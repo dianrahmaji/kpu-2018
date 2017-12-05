@@ -1,0 +1,114 @@
+{{> header}}
+{{> sidepanel}}
+            <div class="col-md-9 main">
+              <div class="row">
+                  <div class="col-md-6">
+                      <h2>
+                          Daftar Pemilih
+                      </h2>
+                  </div>
+                  <div class="col-md-2">
+                      <button style="margin-top: 20px;" class="btn btn-success" id="download">Download Excel</button>
+                  </div>
+                  <div class="col-md-4 pull-right">
+                      <div id="custom-search-input">
+                          <div class="input-group">
+                              <input id="searchBox" type="text" class="form-control input-lg" placeholder="Pencarian" />
+                              <span class="input-group-btn">
+                                  <button id="search" class="btn btn-info btn-lg" type="button">
+                                      <i class="glyphicon glyphicon-search"></i>
+                                  </button>
+                              </span>
+                          </div>
+                      </div>
+                  </div> 
+              </div>
+              <div class="row">
+                <div class="col-md-12">
+                    <hr />
+                </div>   
+              </div> 
+                
+                <table class="table table-hover">
+                        <thead>
+                          <tr>
+                            <th>NIM</th>
+                            <th>Nama</th>
+                            <th>Password</th>
+                            <th>Angkatan</th>
+                            <th>Sudah Memilih?</th>
+                            <th>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                        {{#each data}}
+                          <tr>
+                            <td>{{this.nim}}</td>
+                            <td>{{this.nama}}</td>
+                            <td class="passwd">{{this.password}}</td>
+                            <td>{{this.angkatan}}</td>
+                            {{#if this.sudahMemilih}}
+                              <td>Sudah</td>
+                            {{else}}
+                              <td>Belum</td>
+                            {{/if}}
+                            <td><button id="{{this.nim}}"class="btn btn-danger">Hapus</button></td>
+                          </tr>
+                        {{/each}}
+                        </tbody>
+                </table>
+                {{#ifCond banyakPage '>' 1}}
+                <ul class="pagination">
+                  {{#ifCond currentPage '>' 1}}
+                    <li><a href="/lihat?page=1">&laquo;</a></li>
+                  {{/ifCond}}
+                  {{#for 1 banyakPage 1}}
+                    {{#ifCond ../currentPage '==' this}}
+                      <li class="active"><span>{{this}} <span class="sr-only">(current)</span></span></li>
+                    {{else}}
+                      <li><a href="/lihat?page={{this}}">{{this}}</a></li>
+                    {{/ifCond}}
+                  {{/for}}
+                  {{#ifCond currentPage '!==' banyakPage}}
+                   <li><a href="/lihat?page={{banyakPage}}">&raquo;</a></li>
+                  {{/ifCond}}
+                </ul>
+              {{/ifCond}}
+            </div>
+
+            <script>
+              $("#search").click(function(){
+                var cari = $("#searchBox").val();
+                if(cari !== ""){
+                  window.location="/search?s="+cari;
+                }
+              });
+              $("#searchBox").keypress(function(e){
+                if(e.which == 13) {
+                  var cari = $("#searchBox").val();
+                  if(cari !== ""){
+                    window.location="/search?s="+cari;
+                  }
+                }
+              });
+              $("#download").click(function(){
+                window.location="/download";
+              });
+              $("button").click(function(){
+                var nim = $(this).attr("id");
+                var r = confirm("Hapus NIM "+nim+" ?");
+                if(r){
+                  $.post( "/delete", { nim: nim }, function( data ) {
+                    console.log(data);
+                    if(data.success){
+                      location.reload();
+                    }
+                    else{
+                      alert("gagal");
+                    }
+                  });
+                }
+              })
+            </script>
+    </body>
+</html>

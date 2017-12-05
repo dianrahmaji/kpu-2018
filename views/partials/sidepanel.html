@@ -1,0 +1,38 @@
+<div class="nav-side-menu">
+    <div class="brand">eVote KMTETI</div>
+    <i class="fa fa-bars fa-2x toggle-btn" data-toggle="collapse" data-target="#menu-content"></i>
+        <div class="menu-list">
+  
+            <ul id="menu-content" class="menu-content collapse out">
+                <li>
+                  <a href="/">
+                  <i class="fa fa-dashboard fa-lg"></i> Dashboard
+                  </a>
+                </li>
+
+                <li>
+                  <a href="/input">
+                  <i class="fa fa-user-plus fa-lg"></i> Input Data Pemilih
+                  </a>
+                </li>
+
+                <li>
+                  <a href="/lihat">
+                  <i class="fa fa-users fa-lg"></i> Daftar Pemilih
+                  </a>
+                </li>
+                <li>
+                    <a href="/logout">
+                    <i class="fa fa-sign-out fa-lg"></i> Log Out
+                    </a>
+                </li>
+            </ul>
+     </div>
+</div>
+<script>
+    $(document).ready(function() {
+	// get current URL path and assign 'active' class
+    var pathname = window.location.pathname;
+	$('li > a[href="'+pathname+'"]').parent().addClass('active');
+})
+</script>

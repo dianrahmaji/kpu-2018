@@ -1,0 +1,105 @@
+{{> header}}
+{{> sidepanel}}
+            <div class="col-md-9 main">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h2>
+                            Total Pemilih: {{total}}
+                        </h2>
+                    </div>
+                        <div class="col-md-6">
+                            <button style="margin-top: 20px;" class="btn btn-success pull-right" id="hitung">Perhitungan Suara</button>
+                    </div>
+                </div>
+                <div id="myModal" class="modal">
+                    <div class="modal-content">
+                        <span class="close">&times;</span>
+                        <form id="form3" method="POST" action="/perhitungan">
+                                <label for="password">Password:</label>
+                                <input id="password" type="password" name="password" placeholder="Masukkan Password" required>
+                                <input id="submit" type="submit" />
+                        </form>   
+                    </div>
+                </div>
+                
+                <div class="row">
+                        <div class="col-md-6">
+                            <canvas id="myChart" width="450" height="450"></canvas>
+                            </div>
+                            </div>
+                
+                <script>
+                var ctx = document.getElementById("myChart").getContext('2d');
+                var sudahMemilih = {{sudahMemilih}};
+                var belumMemilih = {{belumMemilih}};
+                var myChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: ["Sudah Memilih", "Belum Memilih"],
+                        datasets: [{
+                            data: [sudahMemilih, belumMemilih],
+                            backgroundColor: [
+                                "#3949AB",
+                                "#D32F2F"
+                            ],
+                            hoverBackgroundColor: [
+                                'rgba(63,81,181, 0.8)',
+                                'rgba(229,57,53, 0.8)'
+                            ]
+                        }]
+                    },
+                    options: {
+                        plugins:{
+                            datalabels: {
+                                color: 'white',
+                                display: function(context) {
+                                    return context.dataset.data[context.dataIndex] > 15;
+                                },
+                                font: {
+                                    size: 30,
+                                    weight: 'bold'
+                                },
+                                formatter: Math.round
+                            }
+                        },
+                        responsive: false
+                    }
+                });
+                // Get the modal
+                var modal = document.getElementById('myModal');
+
+                // Get the button that opens the modal
+                var btn = document.getElementById("hitung");
+
+                // Get the <span> element that closes the modal
+                var span = document.getElementsByClassName("close")[0];
+
+                // When the user clicks on the button, open the modal 
+                btn.onclick = function() {
+                    modal.style.display = "block";
+                }
+
+                // When the user clicks on <span> (x), close the modal
+                span.onclick = function() {
+                    modal.style.display = "none";
+                }
+
+                // When the user clicks anywhere outside of the modal, close it
+                window.onclick = function(event) {
+                    if (event.target == modal) {
+                        modal.style.display = "none";
+                    }
+                }
+
+                $("#password").keypress(function(e) {
+                    // Enter pressed?
+                    if(e.which == 10 || e.which == 13) {
+                        this.form.submit();
+                    }
+                });
+
+                $("#submit").hide();
+                </script>
+            </div>
+    </body>
+</html>

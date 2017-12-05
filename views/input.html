@@ -1,0 +1,119 @@
+{{> header}}
+{{> sidepanel}}
+            <div class="col-md-9 main">
+                <h2>
+                    Input Data Pemilih
+                </h2>
+                <hr />
+                <div class="row">
+                    <div class="col-md-6">
+                        <form id="form1" method="POST" action="/submit">
+                          <div class="form-group">
+                              <label for="nama">Nama:</label>
+                              <input type="text" class="form-control" name="nama" id="nama">
+                          </div>
+                          <div class="form-group">
+                              <label for="nim">NIM (5 digit):</label>
+                              <input type="number" min="10000" max="99999" class="form-control" name="nim" id="nim">
+                          </div>
+                          <div class="form-group">
+                            <label for="nim">Angkatan:</label>
+                            <select name="angkatan">
+                              <option value="0">Pilih Angkatan</option>
+                              <option value="2017">2017</option>
+                              <option value="2016">2016</option>
+                              <option value="2015">2015</option>
+                              <option value="2014">2014</option>
+                              <option value="2013">2013</option>
+                              <option value="2012">2012</option>
+                              <option value="2011">2011</option>
+                              <option value="2010">2010</option>
+                              <option value="2009">2009</option>
+                            </select>
+                        </div>
+                          <button form="form1" type="submit" class="btn btn-default">Submit</button>
+                      </form>
+                    </div>
+                    <div class="col-md-6">
+                      <!--  enctype="multipart/form-data" method="POST" action="/import" -->
+                        <form id="form2">
+                          <div class="form-group">
+                            <label for="excel">Import Excel:</label>
+                            <input type="file" id="fileExcel" class="form-control" name="excel">
+                          </div>
+                          <button form="form2" type="submit" id="btnUpload" class="btn btn-default">Import</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-12">
+                      <hr />
+                      <h3>Data Terbaru</h3>
+                      <table id="myTable" class="table table-hover">
+                              <thead>
+                                <tr>
+                                  <th>NIM</th>
+                                  <th>Nama</th>
+                                  <th>Password</th>
+                                </tr>
+                              </thead>
+                              {{#each data}}
+                              <tbody>
+                                <tr>
+                                  <td>{{this.nim}}</td>
+                                  <td>{{this.nama}}</td>
+                                  <td class="passwd">{{this.password}}</td>
+                                </tr>
+                              </tbody>
+                              {{/each}}
+                      </table>
+                  </div>   
+                </div>
+            </div>
+            <script>
+              $('#form1').on('submit', function (e) {
+                    e.preventDefault();
+                    $.ajax({
+                      type: 'POST',
+                      url: '/submit',
+                      data: $('#form1').serialize(),
+                      success: function (res) {
+                        if(res.status == 200){
+                          alert('Sukses');
+                          $('#myTable tr:first').after('<tr><td>'+res.data.nim+'</td><td>'+res.data.nama+'</td><td class="passwd">'+res.data.password+'</td></tr>');
+                          $('#form1').trigger("reset");
+                          var rowCount = $('#myTable tr').length;
+                          if(rowCount > 4){
+                            $('#myTable tr:last').remove();
+                          }
+                        }
+                        else{
+                          alert(res.message);
+                        }
+                      }
+                    });
+              });
+              $("#btnUpload").click(function (e) {
+                e.preventDefault();
+                var xhr = new XMLHttpRequest();
+                var fileInput = document.getElementById('fileExcel');
+                var file = fileInput.files[0];
+                var formData = new FormData();
+                formData.append('excel', file);
+                xhr.open('POST', '/import', true);
+                xhr.send(formData);
+                xhr.onreadystatechange=function(){
+                  if (xhr.readyState==4 && xhr.status==200){
+                      console.log('xhr.readyState=',xhr.readyState);
+                      console.log('xhr.status=',xhr.status);
+                      console.log('response=',xhr.responseText);
+                      if(xhr.responseText == 'OK'){
+                        alert('SUKSES');
+                        location.reload();
+                      }
+                  }
+                }
+              });
+            </script>
+    </body>
+</html>

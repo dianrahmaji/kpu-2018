@@ -1,0 +1,149 @@
+{{> header}}
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="col-md-9">
+                        <h3>
+                            Perhitungan Suara
+                        </h3>
+                    </div>
+                        <div class="col-md-3">
+                            <button style="margin-top: 20px;" class="btn btn-success pull-right" id="start">Mulai</button>
+                    </div>
+                </div>
+
+                
+                <div class="row">
+                    <div id="hitungChart">
+                            <canvas id="chart" width="1080" height="600"></canvas>
+                    </div>
+                        
+                </div>
+                
+                <script>
+                var data = {{{data}}};
+                var options = {
+                        animation:false,
+                        plugins:{
+                            datalabels: {
+                                color: 'black',
+                                display: function(context) {
+                                    return context.dataset.data[context.dataIndex] > 0;
+                                },
+                                font: {
+                                    size: 30,
+                                    weight: 'bold'
+                                },
+                                formatter: Math.round
+                            }
+                        },
+                        responsive: false,
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    fontSize: 16,
+                                    beginAtZero:true,
+                                    steps: 10,
+                                    stepValue: 5,
+                                    max: {{patokan}}
+                                }
+                            }],
+                            xAxes: [{
+                                ticks: {
+                                    fontColor: 'black',
+                                    fontSize:20
+                                }
+                            }]
+                        },
+                        legend: {
+                            display: false
+                        }
+                    };
+                var ct = document.getElementById("chart").getContext('2d');
+
+                var chart = 
+                            new Chart(ct, {
+                                type: 'bar',
+                                data: {
+                                    labels: ["1. "+data[0].nama, "2. "+data[1].nama, "3. "+data[2].nama],
+                                    datasets: [{
+                                        data: [0, 0, 0],
+                                        backgroundColor: [
+                                        'rgba(255, 99, 132, 0.7)',
+                                        'rgba(54, 162, 235, 0.7)',
+                                        'rgba(255, 206, 86, 0.7)'
+                                        ],
+                                        borderColor: [
+                                        'rgba(255, 99, 132, 0.7)',
+                                        'rgba(54, 162, 235, 0.7)',
+                                        'rgba(255, 206, 86, 0.7)'
+                                        ]
+                                    }],
+                                    borderWidth: 1
+                                },
+                                options: options
+                            });
+                
+
+                function updateChart(suara){
+                    chart.destroy();
+                    chart = 
+                    new Chart(ct, {
+                        type: 'bar',
+                        data: {
+                            labels: ["1. "+data[0].nama, "2. "+data[1].nama, "3. "+data[2].nama],
+                            datasets: [{
+                                data: [suara[0], suara[1], suara[2]],
+                                backgroundColor: [
+                                'rgba(255, 99, 132, 0.7)',
+                                'rgba(54, 162, 235, 0.7)',
+                                'rgba(255, 206, 86, 0.7)'
+                                ],
+                                borderColor: [
+                                'rgba(255, 99, 132, 0.7)',
+                                'rgba(54, 162, 235, 0.7)',
+                                'rgba(255, 206, 86, 0.7)'
+                                ]
+                            }],
+                            borderWidth: 1
+                        },
+                        options: options
+                    });
+                }
+                $("#start").click(function() {
+                    var counter = 0;
+                    let suara = [];
+                    var bar = setInterval(function(){
+                        if(data[0].perolehan_suara > counter){
+                            suara[0] = counter;
+                        }
+                        else{
+                            suara[0] = data[0].perolehan_suara;
+                        }
+
+                        if(data[1].perolehan_suara > counter){
+                            suara[1] = counter;
+                        }
+                        else{
+                            suara[1] = data[1].perolehan_suara;
+                        }
+                        
+                        if(data[2].perolehan_suara > counter){
+                            suara[2] = counter;
+                        }
+                        else{
+                            suara[2] = data[2].perolehan_suara;
+                        }
+
+                        updateChart(suara);
+
+                        if(counter == {{terbesar}}){
+                            alert("Selesai")
+                            clearInterval(bar);
+                        }
+                        counter++;
+                    }, 500);
+                });
+                </script>
+            </div>
+    </body>
+</html>

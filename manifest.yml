@@ -1,0 +1,5 @@
+applications:
+- name: kmteti-evote
+  host: kmteti-evote
+  memory: 512M
+
