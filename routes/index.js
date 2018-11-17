@@ -204,7 +204,7 @@ router.post('/import', ensureAuthenticated, upload.single('excel'), (req, res, n
     if(err) {console.log('error', err);}
     else{
       data.forEach((item) => {
-        item.password = shortid.generate();
+        //item.password = shortid.generate();
         item.createdAt = Date.now();
         item.sudahMemilih = false;
         req.db.collection('db_pemilih').findOne({nim: item.nim}).then(function(result){
