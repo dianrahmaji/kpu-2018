@@ -7,6 +7,7 @@ const shortid = require('shortid');
 const convertExcel = require('excel-as-json').processFile;
 const multer = require('multer');
 const config = require('../config');
+const generatePassword = require('password-generator');
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -224,39 +225,42 @@ router.post('/import', ensureAuthenticated, upload.single('excel'), (req, res, n
 });
 
 router.post('/submit', ensureAuthenticated, (req, res, next) => {
-  if(req.body.nama == undefined){
-    res.json({status: 400, message: "Isi nama dengan benar"});
-  }
-  else if(req.body.nim == undefined || req.body.nim.length != 5){
+  //if(req.body.nama == undefined){
+  //  res.json({status: 400, message: "Isi nama dengan benar"});
+  //}
+  if(req.body.nim == undefined || req.body.nim.length != 5){
     res.json({status: 400, message: "Isi nim dengan benar"});
   }
-  else if(req.body.angkatan == undefined || req.body.angkatan === '0'){
-    res.json({status: 400, message: "Isi data angkatan dengan benar"});
-  }
+  //else if(req.body.angkatan == undefined || req.body.angkatan === '0'){
+    //res.json({status: 400, message: "Isi data angkatan dengan benar"});
+  //}
   else{
-    req.db.collection('db_pemilih').findOne({nim: req.body.nim}, function(err, result){
+    req.db.collection('db_pemilih').findOne({nim: Number(req.body.nim)}, function(err, result){
       if(!err){
         if(result != null){
-          res.json({status: 400, message: "Data sudah ada"});
-        }
-        else{
-          let data = {
-            nama: req.body.nama,
-            nim: Number(req.body.nim),
-            password: shortid.generate(),
-            sudahMemilih: false,
-            angkatan: Number(req.body.angkatan),
-            createdAt: Date.now()
-          }
-          req.db.collection('db_pemilih').insertOne(data, function(err, result){
-            if(!err){
-              console.log("PERHATIAN", data);
-              res.json({status: 200, data: data});
-            }else{
-              res.json({status: 400, message: "Error menginput data"});
-            }
+          req.db.collection('db_pemilih').update({nim: Number(req.body.nim)}, {$set: {password: generatePassword(7, false), createdAt : Date.now()}}, function(err, result){
+            if(err) {console.log("PERHATIAN: ",err);}
+            else {console.log("PERHATIAN", result);}
           });
         }
+        //else{
+          //let data = {
+            //nama: nama,
+            //nim: Number(req.body.nim),
+            //password: shortid.generate(),
+            //sudahMemilih: false,
+            //angkatan: Number(req.body.angkatan),
+            //createdAt: Date.now()
+          //}
+          //req.db.collection('db_pemilih').insertOne(data, function(err, result){
+            //if(!err){
+              //console.log("PERHATIAN", data);
+              //res.json({status: 200, data: data});
+            //}else{
+              //res.json({status: 400, message: "Error menginput data"});
+            //}
+          //});
+        //}
       }
       else{
         res.json({status: 500, message: "Internal Server Error"});
