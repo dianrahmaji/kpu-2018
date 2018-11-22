@@ -1,0 +1,47 @@
+@import url('https://fonts.googleapis.com/css?family=Quicksand:700');
+
+html, body {
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    background-image: url('../images/Background.png');
+    background-repeat:no-repeat;
+    background-attachment: fixed;
+    background-size:cover;
+    display: block;
+}
+
+.dr-input {
+	border-radius: 100px !important;
+	background-color: white !important;
+	border: 1px solid #3E3733 !important;
+	height: 70px !important;
+	width: 360px !important;
+	size: 48px !important;
+	font-size: 20px !important;
+    color: gray !important;
+    text-align: center;
+}
+
+::placeholder{
+    text-align: center;
+	color: gray !important;
+	opacity: 0.5 !important;
+}
+
+
+.dr-button {
+	border-radius: 100px;
+	color: #CFDBBA !important;
+	background-color: #3E3733;
+	border: 1px solid #3E3733 !important;
+	height: 70px !important;
+	font-size: 20px !important;
+}
+
+.dr-button:hover {
+	background-color: #CFDBBA !important;
+	color: #3E3733 !important;
+}
