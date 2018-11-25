@@ -8,6 +8,17 @@ const convertExcel = require('excel-as-json').processFile;
 const multer = require('multer');
 const config = require('../config');
 const generatePassword = require('password-generator');
+var mongoose = require('mongoose');
+const crypto = require('crypto');
+const secrect = 'abcdefg';
+var Schema = mongoose.Schema;
+var adminSchema = new Schema({
+  username: String,
+  password: String
+});
+var addmin = mongoose.model('User', adminSchema);
+
+mongoose.connect(config.database, {autoIndex : false});
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -63,13 +74,24 @@ router.get('/login-admin', (req, res, next) => {
     res.render('login-admin');
 });
 
-router.get('/login-superadmin', (req, res, next) => {
+router.get('login-superadmin', (req, res, next) => {
   res.render('login-superadmin');
 });
 
 router.get('/logout', ensureAuthenticated, (req, res, next) => {
   req.logout();
   res.redirect('/');
+});
+
+router.get('/admin', ensureAuthenticated, (req, res, next) => {
+  req.db.collection('db_admin').find({}).limit(4).sort({createdAt: -1}).toArray(function(err, result){
+    if (!err){
+      res.render('admin', {title: 'Dashboard', data: result});
+    }
+    else{
+      res.render('admin', {title: 'Dashboard'});
+    }
+  });
 });
 
 router.get('/input', ensureAuthenticated, (req, res, next) => {
@@ -250,11 +272,11 @@ router.post('/submit', ensureAuthenticated, (req, res, next) => {
           req.db.collection('db_pemilih').update({nim: Number(req.body.nim)}, {$set: {password: generatePassword(7, false), createdAt : Date.now()}}, function(err, result){
             if(err) {console.log("PERHATIAN: ",err);}
             else {console.log("PERHATIAN", result);
-                  res.json({status: 200, result: result});}
+                  res.json({status: 200, result});}
             });
           }
           else{
-            res.json({status: 400});
+            res.json({status: 400, result : result});
           }
         }
         //else{
@@ -283,6 +305,54 @@ router.post('/submit', ensureAuthenticated, (req, res, next) => {
   }
 });
 
+router.post('/createadmin', ensureAuthenticated, (req, res, next) => {
+  if(req.body.username == undefined || req.body.username.length < 6){
+    res.json({status: 400, message: "Isi username dengan benar"});
+  }
+  else if(req.body.password == undefined){
+    res.json({status: 400, message: "Isi password dengan benar"});
+  }
+  else{
+    req.db.collection('db_admin').findOne({username: req.body.username}, function(err, result){
+      if(!err){
+        if(result != null){
+            res.json({status: 400, message: "Username sudah digunakan"});
+          }
+          else{
+            let data = {
+            username: req.body.username,
+            password: crypto.createHmac('sha256', secrect)
+                      .update(req.body.password)
+                      .digest('hex'),
+            createdAt: Date.now()
+          }
+          req.db.collection('db_admin').insertOne(data, function(err, result){
+            if(!err){
+              console.log("PERHATIAN", data);
+              res.json({status: 200, data: data});
+            }else{
+              res.json({status: 400, message: "Error menginput data"});
+            }
+          });
+          }
+      }
+      else{
+        res.json({status: 500, message: "Internal Server Error"});
+      }
+    });
+  }
+});
+router.post('/login',
+  passport.authenticate('login', { successRedirect: '/login-superadmin',
+                                   failureRedirect: '/login-admin',
+                                   failureFlash: true })
+);
+
+var isValidPassword = function(user, password){
+  if(password!=user.password )
+  return false;
+  else return true;
+}
 //ADMIN WEB AUTHECTICATION
 passport.use('local', new LocalStrategy(
   {usernameField: 'password', passwordField: 'password'}, function(username, password, done){
@@ -299,6 +369,36 @@ passport.use('local', new LocalStrategy(
         return done(null, false);
       }
     });
+}));
+
+// passport/login.js
+passport.use('login', new LocalStrategy({
+    passReqToCallback : true
+  },
+  function(req, username, password, done) { 
+    // check in mongo if a user with username exists or not
+    addmin.findOne({ 'username' :  username }, 
+      function(err, addmin) {
+        // In case of any error, return using the done method
+        if (err)
+          return done(err);
+        // Username does not exist, log error & redirect back
+        if (!addmin){
+          console.log('User Not Found with username '+username);
+          return done(null, false, 
+                req.flash('message', 'User Not found.'));                 
+        }
+        // User exists but wrong password, log the error 
+        if (!isValidPassword(addmin, password)){
+          console.log('Invalid Password');
+          return done(null, false, 
+              req.flash('message', 'Invalid Password'));
+        }
+        // User and password both match, return user from 
+        // done method which will be treated like success
+        return done(null, addmin);
+      }
+    );
 }));
 
 passport.serializeUser(function(user, done) {
