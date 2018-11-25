@@ -16,14 +16,14 @@
         <div class="uk-section-default" style="height: 15%; background: inherit;"></div>
         <div class="uk-section-default uk-flex uk-flex-left uk-flex-middle" style="height: 50%; background: inherit; margin-left: 110px">
             <div style="margin-right: 220px">
-                <form id="form1" method="POST" action="/superlogin">
+                <form method="post">
                     <div class="uk-margin uk-flex uk-flex-center">
                         <h3 style="font-family: 'Quicksand', sans-serif;">Superadmin</h3>
                     </div>
                     <div class="uk-margin">
                         <div class="uk-inline">
                             <span class="uk-form-icon" uk-icon="icon: user"></span>
-                            <input class="uk-input dr-input" type="text" placeholder="Username">
+                            <input class="uk-input dr-input" type="text" placeholder="Username" id="username" name="username">
                         </div>
                     </div>
                     <div class="uk-margin">
@@ -44,28 +44,42 @@
                             <input class="uk-input dr-input" type="password" placeholder="Password 3" id="password3" name="password3">
                         </div>
                     </div>
-                    <button id="login" class="uk-button dr-button" type="submit" name="submit"><b>LOG IN</b></button>
+                    <button id="login" class="uk-button dr-button" type="submit"><b>LOG IN</b></button>
                 </form>
             </div>
         </div>
-		    <!-- <script>
-              $('#form1').on('submit', function (e) {
-                    e.preventDefault();
-                    $.ajax({
+		    <script>
+            //   $('#form1').on('submit', function (e) {
+            //         e.preventDefault();
+            //         $.ajax({
+            //           type: 'POST',
+            //           url: '/superlogin',
+            //           data: $('#form1').serialize(),
+            //           success: function (res) {
+            //             if(res.status == 200){
+            //               alert('Sukses');
+            //               location.reload();
+            //             }
+            //             else{
+            //               alert("Error");
+            //             }
+            //           }
+            //         });
+            //   });
+                var password = $('#password1').val()+$('#password2').val()+$('#password3').val();
+                $.ajax({
                       type: 'POST',
-                      url: '/login-superadmin',
-                      data: $('#form1').serialize(),
+                      url: '/superlogin',
+                      data: password,
                       success: function (res) {
                         if(res.status == 200){
                           alert('Sukses');
-                          location.reload();
                         }
                         else{
                           alert("Error");
                         }
                       }
                     });
-              });
-            </script> -->
+            </script>
     </body>
 </html>
