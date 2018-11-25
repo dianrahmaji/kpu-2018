@@ -1,5 +1,5 @@
 applications:
-- name: kmteti-evote
-  host: kmteti-evote
+- name: kpu-ft
+  host: kpu-ft
   memory: 512M
 
