@@ -43,7 +43,8 @@ function isAdmin (req, res, next) {
   req.flash('denied', "Invalid user authorization"); 
   res.redirect(307, '/'); 
   } 
-  };
+}
+
 function adminAuthenticated(req, res, next) {
   if (req.user.role == "admin" || req.user.role == "superadmin"){
     return next();
@@ -118,47 +119,48 @@ function ensureAuthenticated(req, res, next) {
 /* GET Routes*/
 router.post('/createsuperadmin', ensureAuthenticated, (req, res, next) => { 
   if(req.body.username == undefined){ 
-  res.json({status: 400, message: "Isi Username dengan benar"}); 
+    res.json({status: 400, message: "Isi Username dengan benar"}); 
   } 
   else if(req.body.password1 == undefined){ 
-  res.json({status: 400, message: "Isi Password 1 dengan benar"}); 
+    res.json({status: 400, message: "Isi Password 1 dengan benar"}); 
   } 
   else if(req.body.password2 == undefined){ 
-  res.json({status: 400, message: "Isi Password 2 dengan benar"}); 
+    res.json({status: 400, message: "Isi Password 2 dengan benar"}); 
   } 
   else if(req.body.password3 == undefined){ 
-  res.json({status: 400, message: "Isi Password 3 dengan benar"}); 
+    res.json({status: 400, message: "Isi Password 3 dengan benar"}); 
   } 
   else{ 
-  req.db.collection('db_superadmin').findOne({username: req.body.username}, function(err, result){ 
-  if(!err){ 
-  if(result != null){ 
-  res.json({status: 400, message: "Username sudah digunakan"}); 
+    req.db.collection('db_superadmin').findOne({username: req.body.username}, function(err, result){ 
+    if(!err){ 
+      if(result != null){ 
+        res.json({status: 400, message: "Username sudah digunakan"}); 
+      } 
+      else{ 
+    let data = { 
+      username: req.body.username, 
+      password1: bcrypt.hashSync(req.body.password1, bcrypt.genSaltSync(10), null), 
+      password2: bcrypt.hashSync(req.body.password2, bcrypt.genSaltSync(10), null), 
+      password3: bcrypt.hashSync(req.body.password3, bcrypt.genSaltSync(10), null), 
+      createdAt: Date.now() 
+    } 
+    req.db.collection('db_superadmin').insertOne(data, function(err, result){ 
+      if(!err){ 
+        console.log("PERHATIAN", data); 
+        res.json({status: 200, data: data}); 
+      }
+      else{ 
+        res.json({status: 400, message: "Error menginput data"}); 
+      } 
+      }); 
+    } 
   } 
-  else{ 
-  let data = { 
-  username: req.body.username, 
-  password1: bcrypt.hashSync(req.body.password1, bcrypt.genSaltSync(10), null), 
-  password2: bcrypt.hashSync(req.body.password2, bcrypt.genSaltSync(10), null), 
-  password3: bcrypt.hashSync(req.body.password3, bcrypt.genSaltSync(10), null), 
-  createdAt: Date.now() 
-  } 
-  req.db.collection('db_superadmin').insertOne(data, function(err, result){ 
-  if(!err){ 
-  console.log("PERHATIAN", data); 
-  res.json({status: 200, data: data}); 
-  }else{ 
-  res.json({status: 400, message: "Error menginput data"}); 
-  } 
+    else{ 
+    res.json({status: 500, message: "Internal Server Error"}); 
+    } 
   }); 
   } 
-  } 
-  else{ 
-  res.json({status: 500, message: "Internal Server Error"}); 
-  } 
-  }); 
-  } 
-  });
+});
   router.get('/superadmin', adminAuthenticated, (req, res, next) => { 
     req.db.collection('db_superadmin').find({}).limit(4).sort({createdAt: -1}).toArray(function(err, result){ 
         if (!err){ 
@@ -168,7 +170,10 @@ router.post('/createsuperadmin', ensureAuthenticated, (req, res, next) => {
         res.render('superadmin', {title: 'Dashboard'}); 
         } 
       }); 
-    });  
+  });
+  // router.get('/', (req, res, next) => {
+  //     res.render('index');
+  // });  
   router.get('/', (req, res, next) => {
     if(req.user.role == 'admin' || req.user.role == 'superadmin'){
       req.db.collection('db_pemilih').count(function(err, result){
@@ -191,7 +196,8 @@ router.post('/createsuperadmin', ensureAuthenticated, (req, res, next) => {
           });
         }
      });
-    }else{
+    }
+    else{
       res.render('login', {title: 'Unauthorized'});
     }
   });
