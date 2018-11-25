@@ -61,19 +61,13 @@
                       success: function (res) {
                         if(res.status == 200){
                           alert('Sukses');
+                          location.reload();
                           $('#myTable tr:first').after('<tr><td>'+res.data.nim+'</td><td>'+res.data.nama+'</td><td class="passwd">'+res.data.password+'</td></tr>');
-                          $('#form1').trigger("reset");
                           var rowCount = $('#myTable tr').length;
+                          
                           if(rowCount > 4){
                             $('#myTable tr:last').remove();
                           }
-<<<<<<< HEAD
-                          $.('#submit').on('click', function() {
-                            location.reload();
-                          })
-=======
-                          location.reload();
->>>>>>> 0a726584074d4b6b8e81efcd52bf24391b023135
                         }
                         else{
                           alert("Sudah memilih");
@@ -81,6 +75,7 @@
                       }
                     });
               });
+              
               $("#btnUpload").click(function (e) {
                 e.preventDefault();
                 var xhr = new XMLHttpRequest();
