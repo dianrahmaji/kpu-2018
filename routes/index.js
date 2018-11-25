@@ -48,8 +48,11 @@ function adminAuthenticated(req, res, next) {
   if (req.user.role == "admin" || req.user.role == "superadmin"){
     return next();
   }
+  else if (req.user.role == "superadmin"){
+    res.redirect('/login-superadmin');
+  }
   else {
-    res.redirect('/login-admin');
+	res.redirect('/login-admin');
   }
 }
 
