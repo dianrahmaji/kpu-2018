@@ -16,20 +16,20 @@
         <div class="uk-section-default" style="height: 35%; background: inherit"></div>
         <div class="uk-section-default uk-flex uk-flex-right uk-flex-middle" style="height: 50%; background: inherit;">
             <div style="margin-right: 220px">
-                <form action="/auth" method="POST">
+                <form action="/login" method="post">
                     <div class="uk-margin uk-flex uk-flex-center">
                         <h3 style="font-family: 'Quicksand', sans-serif;">Admin</h3>
                     </div>
                     <div class="uk-margin">
                         <div class="uk-inline">
                             <span class="uk-form-icon" uk-icon="icon: user"></span>
-                            <input class="uk-input dr-input" type="text" placeholder="Username">
+                            <input class="uk-input dr-input" type="text" placeholder="Username" id="username" name="username">
                         </div>
                     </div>
                     <div class="uk-margin">
                         <div class="uk-inline">
                             <span class="uk-form-icon" uk-icon="icon: lock"></span>
-                            <input class="uk-input dr-input" type="text" placeholder="Password">
+                            <input class="uk-input dr-input" type="password" placeholder="Password" id="password" name="password">
                         </div>
                     </div>
                     <button id="login" class="uk-button dr-button" type="submit" name="submit"><b>LOG IN</b></button>
