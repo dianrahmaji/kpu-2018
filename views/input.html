@@ -2,35 +2,16 @@
 {{> sidepanel}}
             <div class="col-md-9 main">
                 <h2>
-                    Input Data Pemilih
+                    Generate Password
                 </h2>
                 <hr />
                 <div class="row">
                     <div class="col-md-6">
                         <form id="form1" method="POST" action="/submit">
                           <div class="form-group">
-                              <label for="nama">Nama:</label>
-                              <input type="text" class="form-control" name="nama" id="nama">
-                          </div>
-                          <div class="form-group">
                               <label for="nim">NIM (5 digit):</label>
                               <input type="number" min="10000" max="99999" class="form-control" name="nim" id="nim">
                           </div>
-                          <div class="form-group">
-                            <label for="nim">Angkatan:</label>
-                            <select name="angkatan">
-                              <option value="0">Pilih Angkatan</option>
-                              <option value="2017">2017</option>
-                              <option value="2016">2016</option>
-                              <option value="2015">2015</option>
-                              <option value="2014">2014</option>
-                              <option value="2013">2013</option>
-                              <option value="2012">2012</option>
-                              <option value="2011">2011</option>
-                              <option value="2010">2010</option>
-                              <option value="2009">2009</option>
-                            </select>
-                        </div>
                           <button form="form1" type="submit" class="btn btn-default">Submit</button>
                       </form>
                     </div>

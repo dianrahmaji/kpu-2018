@@ -59,6 +59,14 @@ router.get('/', (req, res, next) => {
   }
 });
 
+router.get('/login-admin', (req, res, next) => {
+    res.render('login-admin');
+});
+
+router.get('/login-superadmin', (req, res, next) => {
+  res.render('login-superadmin');
+});
+
 router.get('/logout', ensureAuthenticated, (req, res, next) => {
   req.logout();
   res.redirect('/');

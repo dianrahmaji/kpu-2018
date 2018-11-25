@@ -25,7 +25,7 @@ router.post('/login', (req, res, next) => {
             let payload = {
               nim: result.nim
             }
-            var token = jwt.sign(payload, config.secret, {expiresIn: 600});
+            var token = jwt.sign(payload, config.secret, {expiresIn: 60});
             res.json({ success: true, message: 'Selamat Datang.', token: token});
           }
         }
@@ -43,10 +43,10 @@ router.post('/submit', (req, res, next) => {
         res.json({ success: false, message: 'Failed to authenticate token.' });    
       } else {
         if(req.body.nim == decoded.nim){
-          req.db.collection('db_kandidat').update({no_urut: req.body.no_urut}, { $inc: { suara: 1}}, function(err, result){
+          req.db.collection('db_kandidat').update({no_urut: Number(req.body.no_urut)}, { $inc: { suara: 1}}, function(err, result){
             if(err) {console.log("PERHATIAN: ",err);}
             else{
-              req.db.collection('db_kandidat').update({ no_urut: req.body.no_urut}, { $set: {last_updated: Date.now()}}, function(err, res){
+              req.db.collection('db_kandidat').update({ no_urut: Number(req.body.no_urut)}, { $set: {last_updated: Date.now()}}, function(err, res){
                 if(err) {console.log("PERHATIAN: ",err);}
                 else{
                   req.db.collection('db_pemilih').update({nim: Number(req.body.nim)}, {$set: {sudahMemilih: true}}, function(err, result){

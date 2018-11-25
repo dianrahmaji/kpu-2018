@@ -1,5 +1,6 @@
 /node_modules
 /public/uploads
+package-lock.json
 logs.txt
 log.txt
 "Data Mahasiswa.xlsx"
