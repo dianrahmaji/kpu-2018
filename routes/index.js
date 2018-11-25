@@ -11,14 +11,108 @@ const generatePassword = require('password-generator');
 var mongoose = require('mongoose');
 const crypto = require('crypto');
 const secrect = 'abcdefg';
+mongoose.connect(config.database);
+
 var Schema = mongoose.Schema;
 var adminSchema = new Schema({
   username: String,
   password: String
 });
-var addmin = mongoose.model('User', adminSchema);
+var SuperSchema = new Schema({
+  username: String,
+  password1: String,
+  password2: String,
+  password3: String
+})
+var addmin = mongoose.model('User', adminSchema, 'db_admin');
+var addsumin = mongoose.model('Super',SuperSchema, 'db_superadmin');
 
-mongoose.connect(config.database, {autoIndex : false});
+var isValidPassword = function(user, password){
+  return bcrypt.compareSync(password, user.password);
+}
+
+var isSuperValidPassword = function(user, password1, password2, password3){
+  return bcrypt.compareSync(password1, user.password1) && bcrypt.compareSync(password2, user.password2) && bcrypt.compareSync(password3, user.password3);
+}
+
+function isAdmin (req, res, next) { 
+  if(req.user.role == "user" || req.user.role == "superadmin"){
+  return next(); 
+  } 
+  else{ 
+  req.flash('denied', "Invalid user authorization"); 
+  res.redirect(307, '/'); 
+  } 
+  };
+function adminAuthenticated(req, res, next) {
+  if (req.user.role == "admin" ){
+    return next();
+  }
+  else {
+    res.redirect('/login-admin');
+  }
+}
+
+router.get('/login-admin', function(req, res, next) {
+  res.render('login-admin');
+});
+
+router.get('/genpassword', isAdmin, (req, res, next) => {
+  req.db.collection('db_pemilih').find({}).limit(4).sort({createdAt: -1}).toArray(function(err, result){
+    if (!err){
+      res.render('genpassword', {title: 'Dashboard', data: result});
+    }
+    else{
+      res.render('genpassword', {title: 'Dashboard'});
+    }
+  });
+});
+
+router.post('/login-admin', (req, res, next) => {
+  if(req.body.username != null || req.body.username != "" || req.body.username != undefined){
+    req.db.collection('db_admin').findOne({username: req.body.username}, function(err, result) {
+      if(err){console.log("PERHATIAN: ",err);}
+      if(!result){
+        res.json({ success: false, message: 'Authentication failed. username tidak terdaftar.' });
+      }
+      else if (result){
+        if(req.body.password != crypto.createDecipher("SHA256", secrect).update(result.password).final("ascii")){
+          res.json({ success: false, message: 'Authentication failed. Password salah.' });
+        }else{
+            res.json({ success: true, message: 'Selamat Datang.'});
+        }
+      }
+    });
+  }
+});
+
+router.post('/submit', adminAuthenticated, (req, res, next) => {
+  if(req.body.nim == undefined || req.body.nim.length != 5){
+    res.json({status: 400, message: "Isi nim dengan benar"});
+  }
+  else{
+    req.db.collection('db_pemilih').findOne({nim: Number(req.body.nim)}, function(err, result){
+      if(!err){
+        if(result != null){
+          if(!result.sudahMemilih){
+          req.db.collection('db_pemilih').update({nim: Number(req.body.nim)}, {$set: {password: generatePassword(7, false), createdAt : Date.now()}}, function(err, result){
+            if(err) {console.log("PERHATIAN: ",err);}
+            else {console.log("PERHATIAN", result);
+                  res.json({status: 200, result});}
+            });
+          }
+          else{
+            res.json({status: 400, result : result});
+          }
+        }
+      }
+      else{
+        res.json({status: 500, message: "Internal Server Error"});
+      }
+    });
+  }
+});
+
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -39,10 +133,72 @@ function ensureAuthenticated(req, res, next) {
   }
 }
 
+// function adminAuthenticated(req, res, next) {
+//   if (req.isAuthenticated()) {
+//     return next();
+//   }
+//   else {
+//     res.redirect('/login-admin');
+//   }
+// }
+
 
 /* GET Routes*/
+router.post('/createsuperadmin', ensureAuthenticated, (req, res, next) => { 
+  if(req.body.username == undefined){ 
+  res.json({status: 400, message: "Isi Username dengan benar"}); 
+  } 
+  else if(req.body.password1 == undefined){ 
+  res.json({status: 400, message: "Isi Password 1 dengan benar"}); 
+  } 
+  else if(req.body.password2 == undefined){ 
+  res.json({status: 400, message: "Isi Password 2 dengan benar"}); 
+  } 
+  else if(req.body.password3 == undefined){ 
+  res.json({status: 400, message: "Isi Password 3 dengan benar"}); 
+  } 
+  else{ 
+  req.db.collection('db_superadmin').findOne({username: req.body.username}, function(err, result){ 
+  if(!err){ 
+  if(result != null){ 
+  res.json({status: 400, message: "Username sudah digunakan"}); 
+  } 
+  else{ 
+  let data = { 
+  username: req.body.username, 
+  password1: bcrypt.hashSync(req.body.password1, bcrypt.genSaltSync(10), null), 
+  password2: bcrypt.hashSync(req.body.password2, bcrypt.genSaltSync(10), null), 
+  password3: bcrypt.hashSync(req.body.password3, bcrypt.genSaltSync(10), null), 
+  createdAt: Date.now() 
+  } 
+  req.db.collection('db_superadmin').insertOne(data, function(err, result){ 
+  if(!err){ 
+  console.log("PERHATIAN", data); 
+  res.json({status: 200, data: data}); 
+  }else{ 
+  res.json({status: 400, message: "Error menginput data"}); 
+  } 
+  }); 
+  } 
+  } 
+  else{ 
+  res.json({status: 500, message: "Internal Server Error"}); 
+  } 
+  }); 
+  } 
+  });
+  router.get('/superadmin', adminAuthenticated, (req, res, next) => { 
+    req.db.collection('db_superadmin').find({}).limit(4).sort({createdAt: -1}).toArray(function(err, result){ 
+    if (!err){ 
+    res.render('superadmin', {title: 'Dashboard', data: result}); 
+    } 
+    else{ 
+    res.render('superadmin', {title: 'Dashboard'}); 
+    } 
+    }); 
+    });  
 router.get('/', (req, res, next) => {
-  if(req.isAuthenticated()){
+  if(req.user.role == 'admin' || req.user.role == 'superadmin'){
     req.db.collection('db_pemilih').count(function(err, result){
       if(err){
         console.log(err);
@@ -74,8 +230,19 @@ router.get('/login-admin', (req, res, next) => {
     res.render('login-admin');
 });
 
-router.get('login-superadmin', (req, res, next) => {
+router.get('/login-superadmin', (req, res, next) => {
   res.render('login-superadmin');
+});
+
+router.get('/genpassword', adminAuthenticated, (req, res, next) =>{
+  req.db.collection('db_pemilih').find({}).limit(4).sort({createdAt: -1}).toArray(function(err, result){
+    if (!err){
+      res.render('genpassword', {title: 'Dashboard', data: result});
+    }
+    else{
+      res.render('genpassword', {title: 'Dashboard'});
+    }
+  });
 });
 
 router.get('/logout', ensureAuthenticated, (req, res, next) => {
@@ -83,7 +250,7 @@ router.get('/logout', ensureAuthenticated, (req, res, next) => {
   res.redirect('/');
 });
 
-router.get('/admin', ensureAuthenticated, (req, res, next) => {
+router.get('/admin', adminAuthenticated, (req, res, next) => {
   req.db.collection('db_admin').find({}).limit(4).sort({createdAt: -1}).toArray(function(err, result){
     if (!err){
       res.render('admin', {title: 'Dashboard', data: result});
@@ -94,7 +261,7 @@ router.get('/admin', ensureAuthenticated, (req, res, next) => {
   });
 });
 
-router.get('/input', ensureAuthenticated, (req, res, next) => {
+router.get('/input', adminAuthenticated, (req, res, next) => {
   req.db.collection('db_pemilih').find({}).limit(4).sort({createdAt: -1}).toArray(function(err, result){
     if (!err){
       res.render('input', {title: 'Dashboard', data: result});
@@ -105,7 +272,7 @@ router.get('/input', ensureAuthenticated, (req, res, next) => {
   });
 });
 
-router.get('/lihat', ensureAuthenticated, (req, res, next) => {
+router.get('/lihat', adminAuthenticated, (req, res, next) => {
   req.db.collection('db_pemilih').find({}).sort({angkatan: -1, nim: 1}).toArray(function(err, result){
     if(!err){
       let totalPemilih = result.length; //total data
@@ -141,7 +308,7 @@ router.get('/lihat', ensureAuthenticated, (req, res, next) => {
   });
 });
 
-router.get('/download', ensureAuthenticated, (req, res, next) => {
+router.get('/download', adminAuthenticated, (req, res, next) => {
   req.db.collection('db_pemilih').find({}).toArray(function(err, result) {
     if(err) {console.log(err);}
     else{
@@ -150,7 +317,7 @@ router.get('/download', ensureAuthenticated, (req, res, next) => {
   });
 });
 
-router.get('/search', ensureAuthenticated, (req, res, next) => {
+router.get('/search', adminAuthenticated, (req, res, next) => {
   let searchString = req.query.s;
   req.db.collection('db_pemilih').find({$or:
   [
@@ -174,7 +341,7 @@ router.post('/auth', passport.authenticate('local', {failureRedirect:'/', failur
   res.redirect('/');
 });
 
-router.post('/perhitungan', ensureAuthenticated, (req, res, next) => {
+router.post('/perhitungan', adminAuthenticated, (req, res, next) => {
   bcrypt.compare(req.body.password, config.password, function(err, result){
     if(!err) {
       if(result){
@@ -197,7 +364,6 @@ router.post('/perhitungan', ensureAuthenticated, (req, res, next) => {
           let patokan = Math.round((terbesar + 10)/10)*10;
           res.render('perhitungan', {title: "Rekapitulasi Suara", data: JSON.stringify(hasil), terbesar:terbesar, patokan: patokan});
         });
-        //res.render('perhitungan', {});
       }else{
         res.redirect('/');
       }
@@ -207,7 +373,7 @@ router.post('/perhitungan', ensureAuthenticated, (req, res, next) => {
   });
 });
 
-router.post('/delete', ensureAuthenticated, (req, res, next) => {
+router.post('/delete', adminAuthenticated, (req, res, next) => {
   req.db.collection('db_pemilih').findOne({nim: Number(req.body.nim)}, function(err, output) {
     if(err){
       console.log(err);
@@ -229,13 +395,12 @@ router.post('/delete', ensureAuthenticated, (req, res, next) => {
   });
 });
 
-router.post('/import', ensureAuthenticated, upload.single('excel'), (req, res, next) => {
+router.post('/import', adminAuthenticated, upload.single('excel'), (req, res, next) => {
   console.log(req.file);
   convertExcel(req.file.destination+req.file.filename, null, {omitEmptyFields: true}, (err, data) =>{
     if(err) {console.log('error', err);}
     else{
       data.forEach((item) => {
-        //item.password = shortid.generate();
         item.createdAt = Date.now();
         item.sudahMemilih = false;
         req.db.collection('db_pemilih').findOne({nim: item.nim}).then(function(result){
@@ -254,16 +419,10 @@ router.post('/import', ensureAuthenticated, upload.single('excel'), (req, res, n
   res.send('OK');
 });
 
-router.post('/submit', ensureAuthenticated, (req, res, next) => {
-  //if(req.body.nama == undefined){
-  //  res.json({status: 400, message: "Isi nama dengan benar"});
-  //}
+router.post('/submit', adminAuthenticated, (req, res, next) => {
   if(req.body.nim == undefined || req.body.nim.length != 5){
     res.json({status: 400, message: "Isi nim dengan benar"});
   }
-  //else if(req.body.angkatan == undefined || req.body.angkatan === '0'){
-    //res.json({status: 400, message: "Isi data angkatan dengan benar"});
-  //}
   else{
     req.db.collection('db_pemilih').findOne({nim: Number(req.body.nim)}, function(err, result){
       if(!err){
@@ -305,7 +464,7 @@ router.post('/submit', ensureAuthenticated, (req, res, next) => {
   }
 });
 
-router.post('/createadmin', ensureAuthenticated, (req, res, next) => {
+router.post('/createadmin', adminAuthenticated, (req, res, next) => {
   if(req.body.username == undefined || req.body.username.length < 6){
     res.json({status: 400, message: "Isi username dengan benar"});
   }
@@ -321,9 +480,7 @@ router.post('/createadmin', ensureAuthenticated, (req, res, next) => {
           else{
             let data = {
             username: req.body.username,
-            password: crypto.createHmac('sha256', secrect)
-                      .update(req.body.password)
-                      .digest('hex'),
+            password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null),
             createdAt: Date.now()
           }
           req.db.collection('db_admin').insertOne(data, function(err, result){
@@ -343,16 +500,13 @@ router.post('/createadmin', ensureAuthenticated, (req, res, next) => {
   }
 });
 router.post('/login',
-  passport.authenticate('login', { successRedirect: '/login-superadmin',
+  passport.authenticate('login', { successRedirect: '/genpassword',
                                    failureRedirect: '/login-admin',
                                    failureFlash: true })
 );
-
-var isValidPassword = function(user, password){
-  if(password!=user.password )
-  return false;
-  else return true;
-}
+router.post('superlogin',passport.authenticate('login',{successRedirect: '/perhitungan',
+failureRedirect: '/login-admin',
+failureFlash: true }));
 //ADMIN WEB AUTHECTICATION
 passport.use('local', new LocalStrategy(
   {usernameField: 'password', passwordField: 'password'}, function(username, password, done){
@@ -369,36 +523,67 @@ passport.use('local', new LocalStrategy(
         return done(null, false);
       }
     });
-}));
+}))
 
 // passport/login.js
 passport.use('login', new LocalStrategy({
-    passReqToCallback : true
-  },
-  function(req, username, password, done) { 
-    // check in mongo if a user with username exists or not
-    addmin.findOne({ 'username' :  username }, 
-      function(err, addmin) {
-        // In case of any error, return using the done method
-        if (err)
-          return done(err);
-        // Username does not exist, log error & redirect back
-        if (!addmin){
-          console.log('User Not Found with username '+username);
-          return done(null, false, 
-                req.flash('message', 'User Not found.'));                 
-        }
-        // User exists but wrong password, log the error 
-        if (!isValidPassword(addmin, password)){
-          console.log('Invalid Password');
-          return done(null, false, 
-              req.flash('message', 'Invalid Password'));
-        }
-        // User and password both match, return user from 
-        // done method which will be treated like success
-        return done(null, addmin);
+  passReqToCallback : true
+},
+function(req, username, password, done) { 
+  // check in mongo if a user with username exists or not
+  addmin.findOne({ 'username' :  username }, 
+    function(err, addmin) {
+      // In case of any error, return using the done method
+      if (err)
+        return done(err);
+      // Username does not exist, log error & redirect back
+      if (!addmin){
+        console.log('User Not Found with username '+username);
+        return done(null, false, 
+              req.flash('message', 'User Not found.'));                 
       }
-    );
+      // User exists but wrong password, log the error 
+      if (!isValidPassword(addmin, password)){
+        console.log('Invalid Password');
+        return done(null, false, 
+            req.flash('message', 'Invalid Password'));
+      }
+      // User and password both match, return user from 
+      // done method which will be treated like success
+      let add = {role: 'user'};
+      return done(null, add);
+    }
+  );
+}));
+
+passport.use('superlogin', new LocalStrategy({
+  passReqToCallback : true
+},
+function(req, username, password1, password2, password3, done) { 
+  // check in mongo if a user with username exists or not
+  addsumin.findOne({ 'username' :  username }, 
+    function(err, addsumin) {
+      // In case of any error, return using the done method
+      if (err)
+        return done(err);
+      // Username does not exist, log error & redirect back
+      if (!addsumin){
+        console.log('User Not Found with username '+username);
+        return done(null, false, 
+              req.flash('message', 'User Not found.'));                 
+      }
+      // User exists but wrong password, log the error 
+      if (!isSuperValidPassword(addmin, password1, password2, password3)){
+        console.log('Invalid Password');
+        return done(null, false, 
+            req.flash('message', 'Invalid Password'));
+      }
+      // User and password both match, return user from 
+      // done method which will be treated like success
+      let add = {role: 'superadmin'};
+      return done(null, add);
+    }
+  );
 }));
 
 passport.serializeUser(function(user, done) {
@@ -408,6 +593,5 @@ passport.serializeUser(function(user, done) {
 passport.deserializeUser(function(obj, done) {
   done(null, obj);
 });
-
 
 module.exports = router;

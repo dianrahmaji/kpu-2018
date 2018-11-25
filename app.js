@@ -16,7 +16,6 @@ const expressMongoDb = require('express-mongo-db');
 var config = require('./config');
 var index = require('./routes/index');
 var vote = require('./routes/vote');
-var login_admin = require('./routes/login_admin');
 
 var app = express();
 app.use(paginate.middleware(10, 1000));
@@ -80,7 +79,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use('/', index);
 app.use('/vote', vote);
-app.use('/login-admin', login_admin);
 app.use('/public', express.static('public'));
 
 // catch 404 and forward to error handler
