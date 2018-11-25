@@ -21,6 +21,7 @@ var app = express();
 app.use(paginate.middleware(10, 1000));
 app.use(json2xls.middleware);
 app.use(expressMongoDb(config.database));
+app.use('/public', express.static('public'));
 
 // view engine setup
 hbs.registerPartials(__dirname + '/views/partials');
