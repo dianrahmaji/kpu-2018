@@ -246,10 +246,16 @@ router.post('/submit', ensureAuthenticated, (req, res, next) => {
     req.db.collection('db_pemilih').findOne({nim: Number(req.body.nim)}, function(err, result){
       if(!err){
         if(result != null){
+          if(!result.sudahMemilih){
           req.db.collection('db_pemilih').update({nim: Number(req.body.nim)}, {$set: {password: generatePassword(7, false), createdAt : Date.now()}}, function(err, result){
             if(err) {console.log("PERHATIAN: ",err);}
-            else {console.log("PERHATIAN", result);}
-          });
+            else {console.log("PERHATIAN", result);
+                  res.json({status: 200, result: result});}
+            });
+          }
+          else{
+            res.json({status: 400});
+          }
         }
         //else{
           //let data = {
