@@ -36,7 +36,7 @@ var isSuperValidPassword = function(user, password1, password2, password3){
 }
 
 function isAdmin (req, res, next) { 
-  if(req.user.role == "user" || req.user.role == "superadmin"){
+  if(req.user.role == "user"){
   return next(); 
   } 
   else{ 
@@ -45,7 +45,7 @@ function isAdmin (req, res, next) {
   } 
   };
 function adminAuthenticated(req, res, next) {
-  if (req.user.role == "admin" ){
+  if (req.user.role == "admin" || req.user.role == "superadmin"){
     return next();
   }
   else {
@@ -85,34 +85,6 @@ router.post('/login-admin', (req, res, next) => {
     });
   }
 });
-
-router.post('/submit', adminAuthenticated, (req, res, next) => {
-  if(req.body.nim == undefined || req.body.nim.length != 5){
-    res.json({status: 400, message: "Isi nim dengan benar"});
-  }
-  else{
-    req.db.collection('db_pemilih').findOne({nim: Number(req.body.nim)}, function(err, result){
-      if(!err){
-        if(result != null){
-          if(!result.sudahMemilih){
-          req.db.collection('db_pemilih').update({nim: Number(req.body.nim)}, {$set: {password: generatePassword(7, false), createdAt : Date.now()}}, function(err, result){
-            if(err) {console.log("PERHATIAN: ",err);}
-            else {console.log("PERHATIAN", result);
-                  res.json({status: 200, result});}
-            });
-          }
-          else{
-            res.json({status: 400, result : result});
-          }
-        }
-      }
-      else{
-        res.json({status: 500, message: "Internal Server Error"});
-      }
-    });
-  }
-});
-
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -189,124 +161,122 @@ router.post('/createsuperadmin', ensureAuthenticated, (req, res, next) => {
   });
   router.get('/superadmin', adminAuthenticated, (req, res, next) => { 
     req.db.collection('db_superadmin').find({}).limit(4).sort({createdAt: -1}).toArray(function(err, result){ 
-    if (!err){ 
-    res.render('superadmin', {title: 'Dashboard', data: result}); 
-    } 
-    else{ 
-    res.render('superadmin', {title: 'Dashboard'}); 
-    } 
-    }); 
+        if (!err){ 
+        res.render('superadmin', {title: 'Dashboard', data: result}); 
+        } 
+        else{ 
+        res.render('superadmin', {title: 'Dashboard'}); 
+        } 
+      }); 
     });  
-router.get('/', (req, res, next) => {
-  if(req.user.role == 'admin' || req.user.role == 'superadmin'){
-    req.db.collection('db_pemilih').count(function(err, result){
-      if(err){
-        console.log(err);
-        res.render('index', {title: 'Dashboard'});
-      } 
-      else {
-        let total = result;
-        req.db.collection('db_pemilih').find({sudahMemilih: true}).count(function(err, result){
-          if(err){
-            console.log(err);
-            res.render('index', {title: 'Dashboard'});
-          }
-          else{
-            let sudahMilih = result;
-            let belumMilih = total - result;
-            res.render('index', { title: 'Dashboard', total: total, sudahMemilih: sudahMilih, belumMemilih: belumMilih});
-          }
-        });
-      }
-      
-    });
-    
-  }else{
-    res.render('login', {title: 'Unauthorized'});
-  }
-});
-
-router.get('/login-admin', (req, res, next) => {
+  router.get('/', (req, res, next) => {
+    if(req.user.role == 'admin' || req.user.role == 'superadmin'){
+      req.db.collection('db_pemilih').count(function(err, result){
+        if(err){
+          console.log(err);
+          res.render('index', {title: 'Dashboard'});
+        } 
+        else {
+          let total = result;
+          req.db.collection('db_pemilih').find({sudahMemilih: true}).count(function(err, result){
+            if(err){
+              console.log(err);
+              res.render('index', {title: 'Dashboard'});
+            }
+            else  {
+              let sudahMilih = result;
+              let belumMilih = total - result;
+              res.render('index', { title: 'Dashboard', total: total, sudahMemilih: sudahMilih, belumMemilih: belumMilih});
+            }
+          });
+        }
+     });
+    }else{
+      res.render('login', {title: 'Unauthorized'});
+    }
+  });
+// router.get('/adsmin', (req, res, next)=> )
+  router.get('/login-admin', (req, res, next) => {
     res.render('login-admin');
-});
-
-router.get('/login-superadmin', (req, res, next) => {
-  res.render('login-superadmin');
-});
-
-router.get('/genpassword', adminAuthenticated, (req, res, next) =>{
-  req.db.collection('db_pemilih').find({}).limit(4).sort({createdAt: -1}).toArray(function(err, result){
-    if (!err){
-      res.render('genpassword', {title: 'Dashboard', data: result});
-    }
-    else{
-      res.render('genpassword', {title: 'Dashboard'});
-    }
   });
-});
 
-router.get('/logout', ensureAuthenticated, (req, res, next) => {
-  req.logout();
-  res.redirect('/');
-});
-
-router.get('/admin', adminAuthenticated, (req, res, next) => {
-  req.db.collection('db_admin').find({}).limit(4).sort({createdAt: -1}).toArray(function(err, result){
-    if (!err){
-      res.render('admin', {title: 'Dashboard', data: result});
-    }
-    else{
-      res.render('admin', {title: 'Dashboard'});
-    }
+  router.get('/login-superadmin', (req, res, next) => {
+    res.render('login-superadmin');
   });
-});
 
-router.get('/input', adminAuthenticated, (req, res, next) => {
-  req.db.collection('db_pemilih').find({}).limit(4).sort({createdAt: -1}).toArray(function(err, result){
-    if (!err){
-      res.render('input', {title: 'Dashboard', data: result});
-    }
-    else{
-      res.render('input', {title: 'Dashboard'});
-    }
+  router.get('/genpassword', adminAuthenticated, (req, res, next) =>{
+    req.db.collection('db_pemilih').find({}).limit(4).sort({createdAt: -1}).toArray(function(err, result){
+      if (!err){
+        res.render('genpassword', {title: 'Dashboard', data: result});
+      }
+      else{
+        res.render('genpassword', {title: 'Dashboard'});
+      }
+    });
   });
-});
 
-router.get('/lihat', adminAuthenticated, (req, res, next) => {
-  req.db.collection('db_pemilih').find({}).sort({angkatan: -1, nim: 1}).toArray(function(err, result){
-    if(!err){
-      let totalPemilih = result.length; //total data
-      let pageSize = 10; //mau dibagi berapa data per page
-      let banyakPage = Math.round(totalPemilih/pageSize); //berarti butuh sekian page
-      let currentPage = 1; //index page sekarang
-      let dataArray = []; //data per page
-      let data = [];
-      //split list into groups
-      while (result.length > 0) {
+  router.get('/logout', ensureAuthenticated, (req, res, next) => {
+    req.logout();
+    res.redirect('/');
+  });
+
+  router.get('/admin', adminAuthenticated, (req, res, next) => {
+    req.db.collection('db_admin').find({}).limit(4).sort({createdAt: -1}).toArray(function(err, result){
+      if (!err){
+        res.render('admin', {title: 'Dashboard', data: result});
+      }
+      else{
+        res.render('admin', {title: 'Dashboard'});
+      }
+    });
+  });
+
+  router.get('/input', adminAuthenticated, (req, res, next) => {
+    req.db.collection('db_pemilih').find({}).limit(4).sort({createdAt: -1}).toArray(function(err, result){
+      if (!err){
+        res.render('input', {title: 'Dashboard', data: result});
+      }
+      else{
+        res.render('input', {title: 'Dashboard'});
+      }
+    });
+  });
+
+  router.get('/lihat', adminAuthenticated, (req, res, next) => {
+    req.db.collection('db_pemilih').find({}).sort({angkatan: -1, nim: 1}).toArray(function(err, result){
+      if(!err){
+        let totalPemilih = result.length; //total data
+        let pageSize = 10; //mau dibagi berapa data per page
+        let banyakPage = Math.round(totalPemilih/pageSize); //berarti butuh sekian page
+        let currentPage = 1; //index page sekarang
+        let dataArray = []; //data per page
+        let data = [];
+        //split list into groups
+        while (result.length > 0) {
           dataArray.push(result.splice(0, pageSize)); //pecah result per pageSize
-      }
+        }
   
-      //set current page if specifed as get variable (eg: /?page=2)
-      if (typeof req.query.page !== 'undefined') {
-        currentPage = req.query.page;
+        //set current page if specifed as get variable (eg: /?page=2)
+        if (typeof req.query.page !== 'undefined') {
+          currentPage = req.query.page;
+        }
+        //show list of students from group
+        data = dataArray[currentPage - 1];
+        res.render('daftar', 
+        {
+          title: 'Daftar',
+          totalPemilih: totalPemilih,
+          dataArray: dataArray, 
+          pageSize: pageSize,
+          banyakPage: banyakPage,
+          currentPage: currentPage,
+          data: data});
       }
-      //show list of students from group
-      data = dataArray[currentPage - 1];
-      res.render('daftar', 
-      {
-        title: 'Daftar',
-        totalPemilih: totalPemilih,
-        dataArray: dataArray, 
-        pageSize: pageSize,
-        banyakPage: banyakPage,
-        currentPage: currentPage,
-        data: data});
-    }
-    else{
-      res.render('daftar', {title: 'Daftar'});
-    }
+      else{
+        res.render('daftar', {title: 'Daftar'});
+     }
+    });
   });
-});
 
 router.get('/download', adminAuthenticated, (req, res, next) => {
   req.db.collection('db_pemilih').find({}).toArray(function(err, result) {
@@ -419,7 +389,7 @@ router.post('/import', adminAuthenticated, upload.single('excel'), (req, res, ne
   res.send('OK');
 });
 
-router.post('/submit', adminAuthenticated, (req, res, next) => {
+router.post('/submit', isAdmin, (req, res, next) => {
   if(req.body.nim == undefined || req.body.nim.length != 5){
     res.json({status: 400, message: "Isi nim dengan benar"});
   }
@@ -504,9 +474,10 @@ router.post('/login',
                                    failureRedirect: '/login-admin',
                                    failureFlash: true })
 );
-router.post('superlogin',passport.authenticate('login',{successRedirect: '/perhitungan',
-failureRedirect: '/login-admin',
-failureFlash: true }));
+router.post('/superlogin',
+  passport.authenticate('superlogin',{successRedirect: '/perhitungan',
+                                      failureRedirect: '/login-superadmin',
+                                      failureFlash: true }));
 //ADMIN WEB AUTHECTICATION
 passport.use('local', new LocalStrategy(
   {usernameField: 'password', passwordField: 'password'}, function(username, password, done){
