@@ -22,7 +22,17 @@
                 <script>
                 var data = {{{data}}};
                 var options = {
-                        animation:false,
+                        animation: {
+                            duration: 1,
+                            onProgress: function(animation) {
+                                // progress.value = animation.currentStep / animation.numSteps;
+                            },
+                            onComplete: function() {
+                                window.setTimeout(function() {
+							progress.value = 0;
+						    }, 1);
+                            }
+                        },
                         plugins:{
                             datalabels: {
                                 color: 'black',
@@ -44,7 +54,8 @@
                                     beginAtZero:true,
                                     steps: 10,
                                     stepValue: 5,
-                                    max: {{patokan}}
+                                    max: {{patokan}},
+                                    display: false
                                 }
                             }],
                             xAxes: [{
@@ -136,12 +147,12 @@
 
                         updateChart(suara);
 
-                        if(counter == {{terbesar}}){
-                            alert("Selesai")
-                            clearInterval(bar);
-                        }
+                        // if(counter == {{terbesar}}){
+                        //     alert("Selesai")
+                        //     clearInterval(bar);
+                        // }
                         counter++;
-                    }, 500);
+                    }, 3);
                 });
                 </script>
             </div>
