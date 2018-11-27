@@ -164,6 +164,7 @@ router.post('/createsuperadmin', ensureAuthenticated, (req, res, next) => {
   // });  
   router.get('/', (req, res, next) => {
     if(req.user.role == "admin"){
+      //if(req.isAuthenticated()){
       req.db.collection('db_pemilih').count(function(err, result){
         if(err){
           console.log(err);

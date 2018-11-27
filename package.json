@@ -34,5 +34,5 @@
     "shortid": "^2.2.8",
     "password-generator": "^2.2.0",
     "nanoid": "^2.0.0"
-  },
+  }
 }
