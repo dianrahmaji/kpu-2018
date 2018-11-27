@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!-- <!DOCTYPE html> 
 <html lang="en"> 
 <head> 
@@ -140,4 +141,148 @@ width: 100%;
 </div> 
 </form> 
 </body> 
+=======
+<!-- <!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Login Admin</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.0.0-rc.23/css/uikit.min.css" />
+        <link rel="stylesheet" href="../public/stylesheets/dr-styles.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.0.0-rc.23/js/uikit.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.0.0-rc.23/js/uikit-icons.min.js"></script>
+    </head>
+    <body uk-height-viewport>
+        <div class="uk-section-default" style="height: 35%; background: inherit"></div>
+        <div class="uk-section-default uk-flex uk-flex-right uk-flex-middle" style="height: 50%; background: inherit;">
+            <div style="margin-right: 220px">
+                <form action="/login" method="post">
+                    <div class="uk-margin uk-flex uk-flex-center">
+                        <h3 style="font-family: 'Quicksand', sans-serif;">Admin</h3>
+                    </div>
+                    <div class="uk-margin">
+                        <div class="uk-inline">
+                            <span class="uk-form-icon" uk-icon="icon: user"></span>
+                            <input class="uk-input dr-input" type="text" placeholder="Username" id="username" name="username">
+                        </div>
+                    </div>
+                    <div class="uk-margin">
+                        <div class="uk-inline">
+                            <span class="uk-form-icon" uk-icon="icon: lock"></span>
+                            <input class="uk-input dr-input" type="password" placeholder="Password" id="password" name="password">
+                        </div>
+                    </div>
+                    <button id="login" class="uk-button dr-button" type="submit" name="submit"><b>LOG IN</b></button>
+                </form>
+            </div>
+        </div>
+        <script>
+        </script>
+    </body>
+</html> -->
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+        body {font-family: Arial, Helvetica, sans-serif;}
+        form {border: 3px solid #f1f1f1;}
+
+        input[type=text], input[type=password] {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        .cancelbtn {
+            width: auto;
+            padding: 10px 18px;
+            background-color: #f44336;
+        }
+
+        .imgcontainer {
+            text-align: center;
+            margin: 24px 0 12px 0;
+        }
+
+        img.avatar {
+            width: 40%;
+            border-radius: 50%;
+        }
+
+        .container {
+            padding: 16px;
+        }
+
+        span.psw {
+            float: right;
+            padding-top: 16px;
+        }
+
+        ::placeholder{
+        text-align: center;
+        color: gray !important;
+        opacity: 0.5 !important;
+        }
+
+        .dr-button {
+            border-radius: 100px;
+            color: #CFDBBA !important;
+            background-color: #3E3733;
+            border: 1px solid #3E3733 !important;
+            height: 50px !important;
+            font-size: 20px !important;
+        } 
+
+        .dr-button:hover {
+            background-color: #CFDBBA !important;
+            color: #3E3733 !important;
+        }
+        /* Change styles for span and cancel button on extra small screens */
+        @media screen and (max-width: 300px) {
+            span.psw {
+            display: block;
+            float: none;
+            }
+            .cancelbtn {
+            width: 100%;
+            }
+        }
+        </style>
+        <title>Login Admin</title>
+    </head>
+    <body>
+        <h2 style="text-align: center">Login Admin</h2>
+        <form action="/login" method="post">
+            <div class="imgcontainer">
+            </div>
+            <div class="container">
+                <label for="uname"><b>Username</b></label>
+                <input style="border-radius: 100px; text-align: center" type="text" placeholder="Username" id="username" name="username" required>
+                <label for="psw"><b>Password</b></label>
+                <input style="border-radius: 100px; text-align: center" type="password" placeholder="Password" id="password" name="password" required>     
+                <button id="login" class="dr-button" type="submit" name="submit">Login</button>
+            </div>
+        </form>
+    </body>
+>>>>>>> 88d02f634f6a40c999897de756e860ba59a4be6b
 </html>
