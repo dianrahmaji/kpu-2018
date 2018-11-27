@@ -62,7 +62,7 @@
                         if(res.status == 200){
                           alert('Sukses');
                           location.reload();
-                          $('#myTable tr:first').after('<tr><td>'+res.data.nim+'</td><td>'+res.data.nama+'</td><td class="passwd">'+res.data.password+'</td></tr>');
+                          $('#myTable tr:first').after('<tr><td>'+res.data.createdAt+'</td><td>'+res.data.nim+'</td><td>'+res.data.nama+'</td><td class="passwd">'+res.data.password+'</td></tr>');
                           var rowCount = $('#myTable tr').length;
                           
                           if(rowCount > 4){

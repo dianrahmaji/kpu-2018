@@ -11,12 +11,13 @@
         <!-- UIkit JS -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.0.0-rc.23/js/uikit.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.0.0-rc.23/js/uikit-icons.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
     </head>
     <body uk-height-viewport>
         <div class="uk-section-default" style="height: 15%; background: inherit;"></div>
         <div class="uk-section-default uk-flex uk-flex-left uk-flex-middle" style="height: 50%; background: inherit; margin-left: 110px">
             <div style="margin-right: 220px">
-                <form method="post">
+                <form method="POST" id="form1" action="/superlogin">
                     <div class="uk-margin uk-flex uk-flex-center">
                         <h3 style="font-family: 'Quicksand', sans-serif;">Superadmin</h3>
                     </div>
@@ -29,36 +30,29 @@
                     <div class="uk-margin">
                         <div class="uk-inline">
                             <span class="uk-form-icon" uk-icon="icon: lock"></span>
-                            <input class="uk-input dr-input" type="password" placeholder="Password 1" id="password1" name="password1">
+                            <input class="uk-input dr-input pass" type="password" placeholder="Password 1" id="password" name="password">
                         </div>
                     </div>
-                    <div class="uk-margin">
-                        <div class="uk-inline">
-                            <span class="uk-form-icon" uk-icon="icon: lock"></span>
-                            <input class="uk-input dr-input" type="password" placeholder="Password 2" id="password2" name="password2">
-                        </div>
-                    </div>
-                    <div class="uk-margin">
-                        <div class="uk-inline">
-                            <span class="uk-form-icon" uk-icon="icon: lock"></span>
-                            <input class="uk-input dr-input" type="password" placeholder="Password 3" id="password3" name="password3">
-                        </div>
-                    </div>
-                    <button id="login" class="uk-button dr-button" type="submit"><b>LOG IN</b></button>
+                    <button class="uk-button dr-button" type="submit"><b>LOG IN</b></button>
                 </form>
             </div>
         </div>
 		    <script>
+            // var user=$('#username');
+            // var password=$('#password1').val()+$('#password2').val()+$('#password3').val();
+            // var passwords={};
+            // passwords[password]=1
+            // passwords[user]=1;
             //   $('#form1').on('submit', function (e) {
             //         e.preventDefault();
             //         $.ajax({
             //           type: 'POST',
             //           url: '/superlogin',
-            //           data: $('#form1').serialize(),
+            //           data: $('#form1').serialize,
             //           success: function (res) {
             //             if(res.status == 200){
             //               alert('Sukses');
-            //               location.reload();
+            //               //location.reload();
             //             }
             //             else{
             //               alert("Error");
@@ -66,20 +60,27 @@
             //           }
             //         });
             //   });
-                var password = $('#password1').val()+$('#password2').val()+$('#password3').val();
-                $.ajax({
-                      type: 'POST',
-                      url: '/superlogin',
-                      data: password,
-                      success: function (res) {
-                        if(res.status == 200){
-                          alert('Sukses');
-                        }
-                        else{
-                          alert("Error");
-                        }
-                      }
-                    });
+                // $('#form1').on('submit', function (e) {
+                // var usernames = document.getElementById("username").value();
+                // var str1 = document.getElementById("password1").value();
+                // var str2 = document.getElementById("password2").value();
+                // var str3 = document.getElementById("password3").value();
+                // var passwords = str1.concat(str2, str3);
+                // e.preventDefault();
+                // $.ajax({
+                //       type: 'POST',
+                //       url: '/login',
+                //       data: usernames, passwords,
+                //       success: function (res) {
+                //         if(res.status == 200){
+                //           alert('Sukses');
+                //         }
+                //         else{
+                //           alert("Error");
+                //         }
+                //       }
+                //     })
+                // });
             </script>
     </body>
 </html>

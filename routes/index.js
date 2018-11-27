@@ -10,32 +10,20 @@ const config = require('../config');
 const generatePassword = require('password-generator');
 var mongoose = require('mongoose');
 const crypto = require('crypto');
+const nanoid = require('nanoid');
+const generate = require('nanoid/generate');
 const secrect = 'abcdefg';
-mongoose.connect(config.database);
-
+mongoose.connect(config.database,{useNewUrlParser : true});
 var Schema = mongoose.Schema;
 var adminSchema = new Schema({
   username: String,
   password: String
 });
-var superSchema = new Schema({
-  username: String,
-  password: String
-});
 var addmin = mongoose.model('User', adminSchema, 'db_admin');
-var adumin = mongoose.model('Super',superSchema, 'db_superadmin');
+var adumin = mongoose.model('Super',adminSchema, 'db_superadmin');
 
 var isValidPassword = function(user, password){
   return bcrypt.compareSync(password, user.password);
-}
-function isRealAdmin(req, res, next) { 
-  if(req.user.role == "admin"){
-  return next(); 
-  } 
-  else{ 
-  req.flash('denied', "Invalid user authorization"); 
-  res.redirect(307, '/'); 
-  } 
 }
 function isAdmin (req, res, next) { 
   if(req.user.role == "user"){
@@ -43,16 +31,13 @@ function isAdmin (req, res, next) {
   } 
   else{ 
   req.flash('denied', "Invalid user authorization"); 
-  res.redirect(307, '/'); 
+  res.redirect(307, '/');
   } 
 }
 
 function adminAuthenticated(req, res, next) {
-  if (req.user.role == "admin" || req.user.role == "superadmin"){
+  if (req.user.role == "admin"){
     return next();
-  }
-  else if (req.user.role == "superadmin"){
-    res.redirect('/login-superadmin');
   }
   else {
 	res.redirect('/login-admin');
@@ -178,7 +163,7 @@ router.post('/createsuperadmin', ensureAuthenticated, (req, res, next) => {
   //     res.render('index');
   // });  
   router.get('/', (req, res, next) => {
-    if(req.user.role == 'admin' || req.user.role == 'superadmin'){
+    if(req.user.role == "admin"){
       req.db.collection('db_pemilih').count(function(err, result){
         if(err){
           console.log(err);
@@ -407,7 +392,7 @@ router.post('/submit', isAdmin, (req, res, next) => {
       if(!err){
         if(result != null){
           if(!result.sudahMemilih){
-          req.db.collection('db_pemilih').update({nim: Number(req.body.nim)}, {$set: {password: generatePassword(7, false), createdAt : Date.now()}}, function(err, result){
+          req.db.collection('db_pemilih').update({nim: Number(req.body.nim)}, {$set: {password: generate('0123456789ABCDEFGHIJKLMNOPQRSTUVVWXYZ', 7), createdAt : Date.now()}}, function(err, result){
             if(err) {console.log("PERHATIAN: ",err);}
             else {console.log("PERHATIAN", result);
                   res.json({status: 200, result});}
@@ -484,7 +469,7 @@ router.post('/login',
                                    failureFlash: true }));
 router.post('/superlogin',
   passport.authenticate('superlogin',{successRedirect: '/',
-                                      failureRedirect: '/login-admin',
+                                      failureRedirect: '/login-superadmin',
                                       failureFlash: true }));
 //ADMIN WEB AUTHECTICATION
 passport.use('local', new LocalStrategy(
@@ -529,8 +514,8 @@ function(req, username, password, done) {
       }
       // User and password both match, return user from 
       // done method which will be treated like success
-      let add = {role: 'user'};
-      return done(null, add);
+      let user = {role: 'user'};
+      return done(null, user);
     }
   );
 }));
@@ -540,7 +525,7 @@ passport.use('superlogin', new LocalStrategy({
 },
 function(req, username, password, done) { 
   // check in mongo if a user with username exists or not
-  adumin.findOne({'username': username}, 
+  adumin.findOne({ 'username' :  username }, 
     function(err, adumin) {
       // In case of any error, return using the done method
       if (err)
@@ -552,17 +537,15 @@ function(req, username, password, done) {
               req.flash('message', 'User Not found.'));                 
       }
       // User exists but wrong password, log the error 
-      if (!isValidPassword(adumin, req.body.password1+req.body.password2+req.body.password3)){
+      if (!isValidPassword(adumin, password)){
         console.log('Invalid Password');
         return done(null, false, 
             req.flash('message', 'Invalid Password'));
       }
       // User and password both match, return user from 
       // done method which will be treated like success
-      else{
-      let add = {role: 'superadmin'};
-      return done(null, add);
-      }
+      let user = {role: 'admin'};
+      return done(null, user);
     }
   );
 }));
