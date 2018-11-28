@@ -18,10 +18,11 @@
                     </div>
                         
                 </div>
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
                 <script>
                 var data = {{{data}}};
-                var options = {
+                var coptions = {
                         animation: {
                             duration: 1,
                             onProgress: function(animation) {
@@ -55,7 +56,7 @@
                                     steps: 10,
                                     stepValue: 5,
                                     max: {{patokan}},
-                                    display: false
+                                    display: true
                                 }
                             }],
                             xAxes: [{
@@ -75,23 +76,21 @@
                             new Chart(ct, {
                                 type: 'bar',
                                 data: {
-                                    labels: ["1. "+data[0].nama, "2. "+data[1].nama, "3. "+data[2].nama],
+                                    labels: ["1. "+data[0].nama, "2. "+data[1].nama],
                                     datasets: [{
-                                        data: [0, 0, 0],
+                                        data: [0, 0],
                                         backgroundColor: [
                                         'rgba(255, 99, 132, 0.7)',
-                                        'rgba(54, 162, 235, 0.7)',
-                                        'rgba(255, 206, 86, 0.7)'
+                                        'rgba(54, 162, 235, 0.7)'
                                         ],
                                         borderColor: [
                                         'rgba(255, 99, 132, 0.7)',
-                                        'rgba(54, 162, 235, 0.7)',
-                                        'rgba(255, 206, 86, 0.7)'
+                                        'rgba(54, 162, 235, 0.7)'
                                         ]
                                     }],
                                     borderWidth: 1
                                 },
-                                options: options
+                                options: coptions
                             });
                 
 
@@ -101,9 +100,9 @@
                     new Chart(ct, {
                         type: 'bar',
                         data: {
-                            labels: ["1. "+data[0].nama, "2. "+data[1].nama, "3. "+data[2].nama],
+                            labels: ["1. "+data[0].nama, "2. "+data[1].nama],
                             datasets: [{
-                                data: [suara[0], suara[1], suara[2]],
+                                data: [suara[0], suara[1]],
                                 backgroundColor: [
                                 'rgba(255, 99, 132, 0.7)',
                                 'rgba(54, 162, 235, 0.7)',
@@ -117,7 +116,7 @@
                             }],
                             borderWidth: 1
                         },
-                        options: options
+                        options: coptions
                     });
                 }
                 $("#start").click(function() {
@@ -138,12 +137,12 @@
                             suara[1] = data[1].perolehan_suara;
                         }
                         
-                        if(data[2].perolehan_suara > counter){
-                            suara[2] = counter;
-                        }
-                        else{
-                            suara[2] = data[2].perolehan_suara;
-                        }
+                        // if(data[2].perolehan_suara > counter){
+                        //     suara[2] = counter;
+                        // }
+                        // else{
+                        //     suara[2] = data[2].perolehan_suara;
+                        // }
 
                         updateChart(suara);
 

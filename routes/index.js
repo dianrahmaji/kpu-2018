@@ -307,9 +307,6 @@ router.post('/auth', passport.authenticate('local', {failureRedirect:'/', failur
 });
 
 router.post('/perhitungan', adminAuthenticated, (req, res, next) => {
-  bcrypt.compare(req.body.password, config.password, function(err, result){
-    if(!err) {
-      if(result){
         req.db.collection('db_kandidat').find({}).toArray(function(err, result){
           if(err){console.log(err);}
           let hasil = [];
@@ -329,13 +326,6 @@ router.post('/perhitungan', adminAuthenticated, (req, res, next) => {
           let patokan = Math.round((terbesar + 10)/10)*10;
           res.render('perhitungan', {title: "Rekapitulasi Suara", data: JSON.stringify(hasil), terbesar:terbesar, patokan: patokan});
         });
-      }else{
-        res.redirect('/');
-      }
-    }else{
-      res.redirect('/');
-    }
-  });
 });
 
 router.post('/delete', adminAuthenticated, (req, res, next) => {
